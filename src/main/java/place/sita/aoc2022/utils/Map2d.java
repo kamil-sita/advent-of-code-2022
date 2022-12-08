@@ -56,6 +56,11 @@ public class Map2d<T> {
         return map.containsKey(coords) ? Optional.of(map.get(coords)) : Optional.empty();
     }
 
+
+    public T getOrDefault(Coords coords, T def) {
+        return get(coords).orElse(def);
+    }
+
     public T forceGet(Coords coords) {
         return map.get(coords);
     }
