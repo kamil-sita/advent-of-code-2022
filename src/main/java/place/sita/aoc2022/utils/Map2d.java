@@ -11,8 +11,10 @@ import java.util.stream.Collectors;
 
 public class Map2d<T> {
     private final Map<Coords, T> map = new HashMap<>();
-    private int width;
-    private int height;
+    private int minX = 0;
+    private int maxX = 0; // actually max + 1, for calc lengths
+    private int minY = 0;
+    private int maxY = 0; // actually max + 1, for calc lengths
 
     public Map2d() {
     }
@@ -43,13 +45,30 @@ public class Map2d<T> {
     }
 
     public void put(Coords coords, T t) {
-        if (coords.getX() >= width) {
-            width = coords.getX() + 1;
-        }
-        if (coords.getY() >= height) {
-            height = coords.getY() + 1;
-        }
+        updateKnownMapSize(coords);
         map.put(coords, t);
+    }
+
+    private void updateKnownMapSize(Coords coords) {
+        if (valueCount() == 0) {
+            minX = coords.getX();
+            maxX = coords.getX() + 1;
+            minY = coords.getY();
+            maxY = coords.getY() + 1;
+        } else {
+            if (coords.getX() < minX) {
+                minX = coords.getX();
+            }
+            if (coords.getY() < minY) {
+                minY = coords.getY();
+            }
+            if (coords.getX() >= maxX) {
+                maxX = coords.getX() + 1;
+            }
+            if (coords.getY() >= maxY) {
+                maxY = coords.getY() + 1;
+            }
+        }
     }
 
     public Optional<T> get(Coords coords) {
@@ -81,20 +100,16 @@ public class Map2d<T> {
     }
 
     public int getWidth() {
-        return width;
+        return maxX - minX;
     }
 
     public int getHeight() {
-        return height;
-    }
-
-    public Coords bottomRightCoord() {
-        return new Coords(width - 1, height - 1);
+        return maxY - minY;
     }
 
     public void iterator(Map2dIterator<T> iterator) {
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
+        for (int x = minX; x < maxX; x++) {
+            for (int y = minY; y < maxY; y++) {
                 Coords coords = new Coords(x, y);
                 createIterator(iterator, coords);
             }
@@ -141,9 +156,9 @@ public class Map2d<T> {
         if (separators) {
             output.println("===");
         }
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                Coords coords = new Coords(x, y);
+        for (int y = 0; y < getHeight(); y++) {
+            for (int x = 0; x < getWidth(); x++) {
+                Coords coords = new Coords(x + minX, y + minY);
                 Optional<T> optionalT = get(coords);
                 if (optionalT.isPresent()) {
                     output.print(fun.apply(optionalT.get()));
@@ -156,6 +171,10 @@ public class Map2d<T> {
         if (separators) {
             output.println("===");
         }
+    }
+
+    public int valueCount() {
+        return map.values().size();
     }
 
     public interface Map2dIterator<T> {
