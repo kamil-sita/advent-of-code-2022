@@ -1,14 +1,14 @@
-package place.sita.aoc2022.da10;
+package place.sita.aoc2022.day10;
 
 import pl.ksitarski.quickparse.QuickParse;
 import place.sita.aoc2022.utils.Utils;
 
 import java.util.List;
 
-public class Day10_2 {
+public class Day10_1 {
 
     public static void main(String[] args) {
-        new Day10_2().run();
+        new Day10_1().run();
     }
 
     private int xValue = 1;
@@ -18,12 +18,11 @@ public class Day10_2 {
 
         int currentCycle = 1;
         int id = 0;
-        int evaluationLimit = 240;
+        int nextEvaluationMoment = 20;
+        int evaluationLimit = 220;
         int currentInstructionEndsEvaluationAt = -1;
         Ins currentInstruction = null;
-        final int initialPixelId = 0;
-        final int length = 40;
-        int pixelId = initialPixelId;
+        int value = 0;
 
         while (true) {
             // start
@@ -39,39 +38,35 @@ public class Day10_2 {
                 id++;
             }
 
-            // end
-            if (pixelId == xValue || pixelId == xValue - 1 || pixelId == xValue + 1) {
-                System.out.print("#");
-            } else {
-                System.out.print(".");
+            if (currentCycle == nextEvaluationMoment) {
+                value += currentCycle * xValue;
+                nextEvaluationMoment += 40;
             }
+
+            // end
             if (currentInstructionEndsEvaluationAt == currentCycle) {
                 currentInstruction.evaluate(this);
                 currentInstruction = null;
             }
 
             currentCycle++;
-            pixelId++;
-            if (pixelId == length) {
-                pixelId = initialPixelId;
-                System.out.println();
-            }
-
             if (currentCycle > evaluationLimit) {
                 break;
             }
         }
 
+        System.out.println(value);
+
     }
 
     public interface Ins {
-        void evaluate(Day10_2 day);
+        void evaluate(Day10_1 day);
         int insLength();
     }
 
     public static class NoopIns implements Ins {
         @Override
-        public void evaluate(Day10_2 day) {
+        public void evaluate(Day10_1 day) {
 
         }
 
@@ -90,7 +85,7 @@ public class Day10_2 {
 
 
         @Override
-        public void evaluate(Day10_2 day) {
+        public void evaluate(Day10_1 day) {
             day.xValue += adj;
         }
 
